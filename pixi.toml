@@ -1,0 +1,13 @@
+[workspace]
+channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
+name = "latex-pixi-tectonic"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+tectonic = ">=0.16.9,<0.17"
+chktex = ">=1.7.10,<2"
+tex-fmt = ">=0.5.7,<0.6"
+biber = "2.17.*"

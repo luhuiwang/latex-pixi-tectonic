@@ -1,0 +1,37 @@
+# Pixi
+.pixi/*
+!.pixi/config.toml
+
+# LaTeX 编译产物
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.bcf
+*.blg
+*.nav
+*.snm
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.pdfsync
+*.dvi
+*.ps
+
+# PDF（可选，如需版本控制可注释）
+main.pdf
+
+# 编辑器
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
