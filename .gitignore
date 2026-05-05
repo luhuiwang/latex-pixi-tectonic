@@ -29,7 +29,7 @@ main.pdf
 *.swp
 *.swo
 *~
-.vscode/
+# .vscode/
 .idea/
 
 # OS

@@ -1,0 +1,35 @@
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "tectonic",
+      "command": "tectonic",
+      "args": [
+        "-X",
+        "compile",
+        // "--synctex",
+        // "--keep-logs",
+        // "--keep-intermediates",
+        "%DOC_EXT%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "tectonic",
+      "tools": [
+        "tectonic"
+      ]
+    }
+  ],
+  "latex-workshop.latex.magic.args.enabled": "false",
+  "latex-workshop.latex.magic.program.enabled": "false",
+  "latex-workshop.latex.recipe.default": "tectonic",
+  "latex-workshop.formatting.latex": "tex-fmt",
+  "latex-workshop.linting.chktex.exec.args": [
+    "-wall",
+    "-n22",
+    "-n30",
+    "-e16",
+    "%DOC%"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+    // 推荐给该项目的插件列表
+    "recommendations": [
+        "James-Yu.latex-workshop", // LaTeX 核心插件
+        "jfchenier.pixi-vscode-env"
+    ]
+}
