@@ -4,7 +4,21 @@ name = "latex-pixi-tectonic"
 platforms = ["linux-64"]
 version = "0.1.0"
 
-[tasks]
+[tasks.build]
+cmd = """
+tectonic -X compile main.tex --keep-intermediates &&
+biber main &&
+tectonic -X compile main.tex --keep-intermediates &&
+tectonic -X compile main.tex --keep-intermediates
+"""
+
+[tasks.clean]
+cmd = """
+rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log *.run.xml
+"""
+
+[tasks.rebuild]
+depends-on = ["clean","build"]
 
 [dependencies]
 tectonic = ">=0.16.9,<0.17"

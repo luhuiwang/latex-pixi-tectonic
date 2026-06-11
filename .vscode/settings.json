@@ -2,14 +2,10 @@
   "latex-workshop.latex.tools": [
     {
       "name": "tectonic",
-      "command": "tectonic",
+      "command": "pixi",
       "args": [
-        "-X",
-        "compile",
-        // "--synctex",
-        // "--keep-logs",
-        // "--keep-intermediates",
-        "%DOC_EXT%"
+        "run",
+        "build"
       ]
     }
   ],
