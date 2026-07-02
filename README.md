@@ -1,5 +1,7 @@
 # 中文 LaTeX 极简模板 (基于 Pixi + Tectonic)
 
+> **⚠️ 重要提示：** 不建议在 Windows 系统上直接使用 Tectonic。Windows 版本的 Biber 存在已知问题，可能导致编译过程无响应。请使用容器开发环境（WSLC）或 Linux 环境进行编译。
+
 ## 初始状态
 
 空目录，无 `pixi.toml`。
@@ -258,4 +260,70 @@ main.tex        ← 手动创建
 references.bib   ← 手动创建
 main.pdf         ← pixi run build
 .pixi/           ← pixi install
+.devcontainer/   ← 容器开发环境配置
 ```
+
+---
+
+## 容器开发环境 (WSLC)
+
+### 背景
+
+微软于 2026 年 Build 大会发布了 **WSLC (Windows Subsystem for Linux Container)** 预览版，让 Windows 开发者可以直接在 Windows 上使用 Linux 容器，无需安装 Docker Desktop 或其他第三方容器工具。
+
+参考：
+- [WSL container is now available for public preview](https://devblogs.microsoft.com/commandline/wsl-container-is-now-available-for-public-preview/)
+- [WSL container 文档](https://learn.microsoft.com/en-us/windows/wsl/wsl-container)
+
+### 为什么需要容器开发环境？
+
+1. **跨平台一致性** - 容器确保 LaTeX 编译环境在 Windows、Linux、macOS 上完全一致
+2. **依赖管理** - Tectonic、Biber 等工具及其依赖（如 libxml2）在容器内隔离，避免系统污染
+3. **团队协作** - 团队成员使用相同的开发环境，减少"在我机器上能跑"的问题
+4. **WSLC 优势** - 相比传统 Docker，WSLC 更轻量、启动更快，与 Windows 集成更紧密
+
+### devcontainer 配置说明
+
+项目包含 `.devcontainer/` 目录，支持 VS Code 的 Remote Container 扩展：
+
+```
+.devcontainer/
+├── devcontainer.json    # 容器配置
+└── Dockerfile           # 容器镜像定义
+```
+
+**Dockerfile 关键配置：**
+- 基于 `mcr.microsoft.com/devcontainers/base:debian`
+- 安装 pixi 包管理器
+- 配置 git 自动处理行尾符 (`core.autocrlf input`)
+- 设置安全目录 (`safe.directory '*'`)
+
+**devcontainer.json 关键配置：**
+- 使用 volume 挂载 `.pixi` 目录，避免重复安装
+- 自动运行 `pixi install`
+- 集成 LaTeX Workshop 和 pixi 扩展
+
+### 使用方式
+
+1. **安装 WSLC 预览版**
+   ```powershell
+   wsl --update --pre-release
+   ```
+
+2. **安装 VS Code 扩展**
+   - [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+   - 设置 Docker Path 为 `wslc`（在 VS Code 设置中）
+
+3. **打开项目**
+   - 使用 VS Code 打开项目
+   - 点击左下角绿色图标，选择 "Reopen in Container"
+
+### 跨平台行尾符处理
+
+Windows 使用 CRLF 行尾符，Linux 使用 LF。为避免 git 误判文件修改，已在 `.gitattributes` 中配置：
+
+```
+* text=auto
+```
+
+这会自动在 checkout 时转换行尾符，确保跨平台兼容。

@@ -1,0 +1,50 @@
+{
+    "name": "latex-pixi-tectonic",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "vscode",
+    "mounts": [
+        "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
+    ],
+    "postCreateCommand": "sudo chown -R vscode .pixi && sudo chmod -R 755 .git 2>/dev/null || true && pixi install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "James-Yu.latex-workshop",
+                "jfchenier.pixi-vscode-env"
+            ],
+            "settings": {
+                "latex-workshop.latex.tools": [
+                    {
+                        "name": "tectonic",
+                        "command": "pixi",
+                        "args": [
+                            "run",
+                            "build"
+                        ]
+                    }
+                ],
+                "latex-workshop.latex.recipes": [
+                    {
+                        "name": "tectonic",
+                        "tools": [
+                            "tectonic"
+                        ]
+                    }
+                ],
+                "latex-workshop.latex.magic.args.enabled": false,
+                "latex-workshop.latex.magic.program.enabled": false,
+                "latex-workshop.latex.recipe.default": "tectonic",
+                "latex-workshop.formatting.latex": "tex-fmt",
+                "latex-workshop.linting.chktex.exec.args": [
+                    "-wall",
+                    "-n22",
+                    "-n30",
+                    "-e16",
+                    "%DOC%"
+                ]
+            }
+        }
+    }
+}
