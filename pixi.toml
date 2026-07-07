@@ -1,7 +1,7 @@
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "latex-pixi-tectonic"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks.build]
@@ -22,6 +22,29 @@ depends-on = ["clean","build"]
 
 [dependencies]
 tectonic = ">=0.16.9,<0.17"
-chktex = ">=1.7.10,<2"
+chktex = ">=1.7.9,<2"
 tex-fmt = ">=0.5.7,<0.6"
+
+[target.linux-64.dependencies]
 biber = "2.17.*"
+
+[target.win-64.tasks.download-biber]
+cmd = """
+test -f ".pixi/biber/biber.exe" || (
+    rtk curl -L -o biber.zip "https://sourceforge.net/projects/biblatex-biber/files/biblatex-biber/2.17/binaries/Windows/biber-MSWIN64.zip/download" &&
+    powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('biber.zip', '.pixi/biber')" &&
+    del biber.zip
+)
+"""
+
+[target.win-64.tasks.build]
+depends-on = ["download-biber"]
+cmd = """
+tectonic -X compile main.tex --keep-intermediates &&
+.pixi/biber/biber.exe main &&
+tectonic -X compile main.tex --keep-intermediates &&
+tectonic -X compile main.tex --keep-intermediates
+"""
+
+[target.win-64.tasks.clean]
+cmd = "pwsh -Command \"Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue\""

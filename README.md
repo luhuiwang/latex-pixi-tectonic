@@ -1,6 +1,6 @@
 # 中文 LaTeX 极简模板 (基于 Pixi + Tectonic)
 
-> **⚠️ 重要提示：** 不建议在 Windows 系统上直接使用 Tectonic。Windows 版本的 Biber 存在已知问题，可能导致编译过程无响应。请使用容器开发环境（WSLC）或 Linux 环境进行编译。
+> ✅ 本模板现已支持 Windows 和 Linux 两大平台。Windows 用户可直接使用，无需容器环境。
 
 ## 初始状态
 
@@ -20,7 +20,7 @@ $ pixi init -c conda-forge
 [workspace]
 channels = ["conda-forge"]
 name = "test"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
@@ -42,7 +42,7 @@ $ pixi workspace channel add https://conda.anaconda.org/dnachun
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "test"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
@@ -64,7 +64,7 @@ $ pixi workspace name set latex-pixi-tectonic
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "latex-pixi-tectonic"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
@@ -89,7 +89,7 @@ $ pixi add tectonic biber chktex tex-fmt
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "latex-pixi-tectonic"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
@@ -118,7 +118,7 @@ $ pixi add "biber=2.17.*"
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "latex-pixi-tectonic"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
@@ -153,6 +153,11 @@ $ pixi task add rebuild "clean build"
 ✔ Added task 'rebuild'
 ```
 
+> **Windows 用户注意：** 如果使用 pwsh，clean 命令请改为：
+> ```pwsh
+> pixi task add clean 'pwsh -Command "Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue"'
+> ```
+
 `pixi.toml` 变化：
 ```toml
 [tasks.build]
@@ -178,7 +183,7 @@ depends-on = ["clean","build"]
 [workspace]
 channels = ["conda-forge", "https://conda.anaconda.org/dnachun"]
 name = "latex-pixi-tectonic"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks.build]
@@ -234,6 +239,8 @@ pixi task add rebuild "clean build"
 pixi install
 ```
 
+> **Windows 用户：** 将 clean 命令替换为 `pwsh -Command "Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue"`
+
 ---
 
 ## 使用方式
@@ -265,7 +272,7 @@ main.pdf         ← pixi run build
 
 ---
 
-## 容器开发环境 (WSLC)
+## 容器开发环境（可选）
 
 ### 背景
 
@@ -275,12 +282,14 @@ main.pdf         ← pixi run build
 - [WSL container is now available for public preview](https://devblogs.microsoft.com/commandline/wsl-container-is-now-available-for-public-preview/)
 - [WSL container 文档](https://learn.microsoft.com/en-us/windows/wsl/wsl-container)
 
-### 为什么需要容器开发环境？
+### 为什么需要容器开发环境（可选）？
 
-1. **跨平台一致性** - 容器确保 LaTeX 编译环境在 Windows、Linux、macOS 上完全一致
+1. **跨平台一致性** - 容器确保 LaTeX 编译环境在 Windows 和 Linux 上完全一致
 2. **依赖管理** - Tectonic、Biber 等工具及其依赖（如 libxml2）在容器内隔离，避免系统污染
 3. **团队协作** - 团队成员使用相同的开发环境，减少"在我机器上能跑"的问题
-4. **WSLC 优势** - 相比传统 Docker，WSLC 更轻量、启动更快，与 Windows 集成更紧密
+4. **WSLC 更轻量** - 相比传统 Docker，WSLC 更轻量、启动更快，与 Windows 集成更紧密
+
+> 提示：直接使用 pixi 在本机编译也能正常工作，容器环境仅作为可选的隔离方案。
 
 ### devcontainer 配置说明
 
