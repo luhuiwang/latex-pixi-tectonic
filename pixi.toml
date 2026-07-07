@@ -4,7 +4,7 @@ name = "latex-pixi-tectonic"
 platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
-[tasks.build]
+[tasks.buildx]
 cmd = """
 tectonic -X compile main.tex --keep-intermediates &&
 biber main &&
@@ -12,9 +12,12 @@ tectonic -X compile main.tex --keep-intermediates &&
 tectonic -X compile main.tex --keep-intermediates
 """
 
+[tasks.build]
+cmd =  "tectonic -X compile main.tex"
+
 [tasks.clean]
 cmd = """
-rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log *.run.xml
+rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log
 """
 
 [tasks.rebuild]
@@ -30,21 +33,21 @@ biber = "2.17.*"
 
 [target.win-64.tasks.download-biber]
 cmd = """
-test -f ".pixi/biber/biber.exe" || (
-    rtk curl -L -o biber.zip "https://sourceforge.net/projects/biblatex-biber/files/biblatex-biber/2.17/binaries/Windows/biber-MSWIN64.zip/download" &&
-    powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('biber.zip', '.pixi/biber')" &&
-    del biber.zip
-)
+pwsh -Command "if (-not (Test-Path '.pixi/envs/default/Library/bin/biber.exe')) { curl.exe -L -o biber.zip 'https://sourceforge.net/projects/biblatex-biber/files/biblatex-biber/2.17/binaries/Windows/biber-MSWIN64.zip/download'; Expand-Archive -LiteralPath biber.zip -DestinationPath '.pixi/envs/default/Library/bin'; Remove-Item biber.zip }"
+"""
+
+[target.win-64.tasks.buildx]
+depends-on = ["download-biber"]
+cmd = """
+tectonic -X compile main.tex --keep-intermediates &&
+biber main &&
+tectonic -X compile main.tex --keep-intermediates &&
+tectonic -X compile main.tex --keep-intermediates
 """
 
 [target.win-64.tasks.build]
 depends-on = ["download-biber"]
-cmd = """
-tectonic -X compile main.tex --keep-intermediates &&
-.pixi/biber/biber.exe main &&
-tectonic -X compile main.tex --keep-intermediates &&
-tectonic -X compile main.tex --keep-intermediates
-"""
+cmd = "tectonic -X compile main.tex"
 
 [target.win-64.tasks.clean]
 cmd = "pwsh -Command \"Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue\""

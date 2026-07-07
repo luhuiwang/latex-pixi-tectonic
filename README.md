@@ -74,13 +74,12 @@ version = "0.1.0"
 
 ---
 
-## Step 4: `pixi add tectonic biber chktex tex-fmt`
+## Step 4: `pixi add tectonic chktex tex-fmt`
 
 ```bash
-$ pixi add tectonic biber chktex tex-fmt
+$ pixi add tectonic chktex tex-fmt
 ✔ Added tectonic >=0.16.9,<0.17
-✔ Added biber >=2.20,<3
-✔ Added chktex >=1.7.10,<2
+✔ Added chktex >=1.7.9,<2
 ✔ Added tex-fmt >=0.5.7,<0.6
 ```
 
@@ -96,20 +95,18 @@ version = "0.1.0"
 
 [dependencies]
 tectonic = ">=0.16.9,<0.17"
-biber = ">=2.20,<3"
-chktex = ">=1.7.10,<2"
+chktex = ">=1.7.9,<2"
 tex-fmt = ">=0.5.7,<0.6"
 ```
 
 ---
 
-## Step 5: 修改 biber 为 2.17.*
+## Step 5: 添加 Linux 平台专用的 biber
+
+`biber` 在 Windows 上无 conda 包，因此仅添加到 Linux 目标平台。
 
 ```bash
-$ pixi remove biber
-✔ Removed biber
-
-$ pixi add "biber=2.17.*"
+$ pixi add --platform linux-64 "biber=2.17.*"
 ✔ Added biber=2.17.*
 ```
 
@@ -125,8 +122,10 @@ version = "0.1.0"
 
 [dependencies]
 tectonic = ">=0.16.9,<0.17"
-chktex = ">=1.7.10,<2"
+chktex = ">=1.7.9,<2"
 tex-fmt = ">=0.5.7,<0.6"
+
+[target.linux-64.dependencies]
 biber = "2.17.*"
 ```
 
@@ -144,29 +143,43 @@ $ pixi install
 
 ## Step 7: 添加编译任务
 
+### 自动编译（tectonic 内置处理文献）
+
 ```bash
-$ pixi task add build "tectonic -X compile main.tex --keep-intermediates && biber main && tectonic -X compile main.tex --keep-intermediates && tectonic -X compile main.tex --keep-intermediates"
+$ pixi task add build "tectonic -X compile main.tex"
 ✔ Added task 'build'
+```
+
+### 分步编译（调用外部 biber 处理文献）
+
+```bash
+$ pixi task add buildx "tectonic -X compile main.tex --keep-intermediates && biber main && tectonic -X compile main.tex --keep-intermediates && tectonic -X compile main.tex --keep-intermediates"
+✔ Added task 'buildx'
+```
+
+### 清理与重编译
+
+```bash
 $ pixi task add clean "rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log"
 ✔ Added task 'clean'
 $ pixi task add rebuild "clean build"
 ✔ Added task 'rebuild'
 ```
 
-> **Windows 用户注意：** 如果使用 pwsh，clean 命令请改为：
-> ```pwsh
-> pixi task add clean 'pwsh -Command "Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue"'
-> ```
+> **Windows 用户注意：** pixi 支持平台特定任务，本项目的 `pixi.toml` 已经内置 Windows 专用的 `clean`、`download-biber` 和 `buildx` 任务，无需手动配置。
 
 `pixi.toml` 变化：
 ```toml
-[tasks.build]
+[tasks.buildx]
 cmd = """
 tectonic -X compile main.tex --keep-intermediates &&
 biber main &&
 tectonic -X compile main.tex --keep-intermediates &&
 tectonic -X compile main.tex --keep-intermediates
 """
+
+[tasks.build]
+cmd = "tectonic -X compile main.tex"
 
 [tasks.clean]
 cmd = "rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log"
@@ -186,7 +199,7 @@ name = "latex-pixi-tectonic"
 platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
-[tasks.build]
+[tasks.buildx]
 cmd = """
 tectonic -X compile main.tex --keep-intermediates &&
 biber main &&
@@ -194,17 +207,45 @@ tectonic -X compile main.tex --keep-intermediates &&
 tectonic -X compile main.tex --keep-intermediates
 """
 
+[tasks.build]
+cmd =  "tectonic -X compile main.tex"
+
 [tasks.clean]
-cmd = "rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log"
+cmd = """
+rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log
+"""
 
 [tasks.rebuild]
 depends-on = ["clean","build"]
 
 [dependencies]
 tectonic = ">=0.16.9,<0.17"
-chktex = ">=1.7.10,<2"
+chktex = ">=1.7.9,<2"
 tex-fmt = ">=0.5.7,<0.6"
+
+[target.linux-64.dependencies]
 biber = "2.17.*"
+
+[target.win-64.tasks.download-biber]
+cmd = """
+pwsh -Command "if (-not (Test-Path '.pixi/envs/default/Library/bin/biber.exe')) { curl.exe -L -o biber.zip 'https://sourceforge.net/projects/biblatex-biber/files/biblatex-biber/2.17/binaries/Windows/biber-MSWIN64.zip/download'; Expand-Archive -LiteralPath biber.zip -DestinationPath '.pixi/envs/default/Library/bin'; Remove-Item biber.zip }"
+"""
+
+[target.win-64.tasks.buildx]
+depends-on = ["download-biber"]
+cmd = """
+tectonic -X compile main.tex --keep-intermediates &&
+biber main &&
+tectonic -X compile main.tex --keep-intermediates &&
+tectonic -X compile main.tex --keep-intermediates
+"""
+
+[target.win-64.tasks.build]
+depends-on = ["download-biber"]
+cmd = "tectonic -X compile main.tex"
+
+[target.win-64.tasks.clean]
+cmd = "pwsh -Command \"Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue\""
 ```
 
 ---
@@ -230,24 +271,27 @@ Tectonic 捆绑了自身的 `libxml2`，而 `biber` 依赖系统安装的 `libxm
 pixi init -c conda-forge
 pixi workspace channel add https://conda.anaconda.org/dnachun
 pixi workspace name set latex-pixi-tectonic
-pixi add tectonic biber chktex tex-fmt
-pixi remove biber
-pixi add "biber=2.17.*"
-pixi task add build "tectonic -X compile main.tex --keep-intermediates && biber main && tectonic -X compile main.tex --keep-intermediates && tectonic -X compile main.tex --keep-intermediates"
+pixi add tectonic chktex tex-fmt
+pixi add --platform linux-64 "biber=2.17.*"
+pixi task add build "tectonic -X compile main.tex"                          # 自动编译（tectonic 内置处理文献）
+pixi task add buildx "tectonic -X compile main.tex --keep-intermediates && biber main && tectonic -X compile main.tex --keep-intermediates && tectonic -X compile main.tex --keep-intermediates"  # 分步编译（调用外部 biber）
 pixi task add clean "rm -f *.aux *.bcf *.bbl *.blg *.run.xml *.toc *.out *.log"
 pixi task add rebuild "clean build"
 pixi install
 ```
 
-> **Windows 用户：** 将 clean 命令替换为 `pwsh -Command "Remove-Item -Force *.aux,*.bcf,*.bbl,*.blg,*.run.xml,*.toc,*.out,*.log -ErrorAction SilentlyContinue"`
+> **Windows 用户：** `pixi install` 后还需配置 Windows 平台特定任务（`download-biber`、`clean`），可直接参考本项目的 `pixi.toml`。
 
 ---
 
 ## 使用方式
 
 ```bash
-# 编译
+# 自动编译（tectonic 内置处理文献）
 pixi run build
+
+# 分步编译（tectonic → biber → tectonic → tectonic，调用外部 biber）
+pixi run buildx
 
 # 清理中间文件
 pixi run clean
