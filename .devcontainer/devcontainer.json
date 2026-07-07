@@ -12,7 +12,8 @@
         "vscode": {
             "extensions": [
                 "James-Yu.latex-workshop",
-                "jfchenier.pixi-vscode-env"
+                "jfchenier.pixi-vscode-env",
+                "fedaykindev.openchamber"
             ],
             "settings": {
                 "latex-workshop.latex.tools": [
