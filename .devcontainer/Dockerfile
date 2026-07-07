@@ -9,7 +9,7 @@ RUN mkdir -p /home/vscode/.pixi/bin \
     && git config --global core.autocrlf input
 
 RUN sudo apt update \
-    && sudo apt install -y locales fonts-noto-cjk fish bash-completion \
+    && sudo apt install -y locales fonts-noto-cjk bash-completion \
     && sudo locale-gen zh_CN.UTF-8 \
     && sudo update-locale LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8
 
